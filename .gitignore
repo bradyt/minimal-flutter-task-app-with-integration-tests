@@ -39,3 +39,10 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+pubspec.lock
+
+fixture/.task/
+fixture/.taskrc
+fixture/pki/*.pem
+fixture/var/
