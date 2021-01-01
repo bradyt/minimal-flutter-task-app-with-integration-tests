@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:taskc/taskc.dart' as taskc;
+
+import 'helper_functions.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -13,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter prototype to test taskd setup'),
     );
   }
 }
@@ -28,12 +32,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  taskc.Connection _connection;
+  taskc.Credentials _credentials;
+  Map _stats;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  Future<void> _getStatistics() async {
+    _connection = await getConnection(context);
+    _credentials = await getCredentials(context);
+    var result = await taskc.statistics(
+      connection: _connection,
+      credentials: _credentials,
+    );
+    _stats = result.header;
+    setState(() {});
   }
 
   @override
@@ -42,24 +53,31 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              'Statistics are:',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            if (_stats == null)
+              Text(
+                '$_stats',
+                style: Theme.of(context).textTheme.headline4,
+              )
+            else
+              for (var entry in _stats.entries)
+                Text(
+                  '${entry.key}: ${entry.value}',
+                  style: Theme.of(context).textTheme.headline4,
+                )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+        onPressed: _getStatistics,
+        tooltip: 'Statistics',
+        child: Icon(Icons.refresh),
       ),
     );
   }
